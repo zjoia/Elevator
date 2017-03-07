@@ -134,14 +134,45 @@ class Building
 
     public function openDoors(Elevator $elevator)
     {
-        if($elevator->getDoor() == 0)
+
+        if ($elevator->getFloor() == null)
         {
-            $elevator->changeDoor();
+            return;
         }
+
+        $floor = $elevator->getFloor();
+
+        $request = $floor->getRequest();
+
+        //Check if the doors need to be open or not depending on the location and the requests
+
+        //When doors open a trip is completed
+        $elevator->addTrip();
+
     }
     // Move the indicated elevator in the direction called
+    // Make sure not to blow out the top or drop through the bottom
     public function moveElevator($elevator)
     {
+        if (!$elevator->getIsMoving())
+        {
+            return;
+        }
 
+        $currentFloor = $this->floorNumber($elevator->getFloor());
+
+        $nextFloor = $currentFloor + $elevator->getDirectionOffset();
+
+        $maxFloor = $this->numberOfFloors() - 1;
+
+        if ($nextFloor <= $maxFloor && $nextFloor >= 0)
+        {
+            $this->getFloor($nextFloor)->setElevatorOnThisFloor($e);
+        }
+
+        if ($nextFloor >= $maxFloor || $nextFloor <= 0)
+        {
+            $elevator->switchDirections();
+        }
     }
 }

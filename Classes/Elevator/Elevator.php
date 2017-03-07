@@ -224,4 +224,12 @@ class Elevator
     {
         return $this->getDirection() == "down";
     }
+    
+    public function enterMaint()
+    {
+        if ($this->trips >= 100)
+        {
+            $this->isMaint = 1;
+        }
+    }
 }

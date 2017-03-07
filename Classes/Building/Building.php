@@ -55,7 +55,7 @@ class Building
         return $this->name;
     }
 
-    public function getFloor($floor)
+    public function getFloor(Floor $floor)
     {
         return $this->floors[$floor];
     }
@@ -75,7 +75,7 @@ class Building
         return $this->elevators;
     }
 
-    public function addElevator($elevator)
+    public function addElevator(Elevator $elevator)
     {
         return ($this->elevators[] = $elevator) ? true : false;
     }
@@ -92,22 +92,53 @@ class Building
     // Get the floor numbers in reverse
     public function getFloorsReversed()
     {
-        return array_reverse($this->floors);
+        return array_reverse($this->getFloors());
     }
 
     // indicate to the elevator bank that a button has been pushed
     // and which direction was selected
+    // an Action is sent from pressing the button and contains
+    // action = "direction_floorNumber" : string
     public function buttonPressed($action)
     {
+        $input = explode("_",$action);
+        $direction = $input[1];
+        $floorNumber = $input[2];
 
+        foreach ($this->getFloors() as $floor)
+        {
+            if ($floor->getNumber() == $floorNumber)
+            {
+                $request = $direction == "up" ? $floor->getUpRequest() : $floor->getDownRequest();
+                $request->setIsCalled(true);
+                return;
+            }
+        }
     }
 
     // Identify the next step for the elevator bank
     public function nextStep()
     {
+        foreach ($this->getElevators() as $elevator)
+        {
+            $this->moveElevator($elevator);
+            $this->openDoors($elevator);
+            if ($elevator->getIsMoving() || $elevator->getDoor() != 1)
+            {
+                continue;
+            }
 
+            //Manage people coming and going
+        }
     }
 
+    public function openDoors(Elevator $elevator)
+    {
+        if($elevator->getDoor() == 0)
+        {
+            $elevator->changeDoor();
+        }
+    }
     // Move the indicated elevator in the direction called
     public function moveElevator($elevator)
     {
